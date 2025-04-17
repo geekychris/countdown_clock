@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time till Freedom</title>
+    <style>
+        /* Global styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #111;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Countdown container styles */
+        .countdown-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .countdown-segment {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .digits-container {
+            display: flex;
+        }
+
+        .segment-label {
+            font-size: 1.2rem;
+            margin-top: 10px;
+            text-transform: uppercase;
+            color: #ccc;
+        }
+
+        /* Separator styles */
+        .separator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 10px;
+        }
+
+        .separator-dots {
+            display: flex;
+            flex-direction: column;
+            height: 120px;
+            justify-content: space-evenly;
+        }
+
+        .separator-dot {
+            width: 12px;
+            height: 12px;
+            background-color: #f00;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #f00;
+        }
+
+        .separator-label {
+            font-size: 1.2rem;
+            margin-top: 10px;
+            visibility: hidden;
+        }
+
+        /* Seven-segment digit styles */
+        .digit {
+            width: 70px;
+            height: 120px;
+            position: relative;
+            margin: 0 5px;
+        }
+
+        .segment {
+            position: absolute;
+            background-color: rgba(255, 0, 0, 0.15);
+            transition: background-color 0.2s;
+        }
+
+        .segment.on {
+            background-color: #f00;
+            box-shadow: 0 0 10px #f00;
+        }
+
+        /* Horizontal segments */
+        .segment-a, .segment-d, .segment-g {
+            width: 50px;
+            height: 10px;
+            left: 10px;
+        }
+
+        .segment-a {
+            top: 0;
+        }
+
+        .segment-g {
+            top: 55px;
+        }
+
+        .segment-d {
+            bottom: 0;
+        }
+
+        /* Vertical segments */
+        .segment-b, .segment-c, .segment-e, .segment-f {
+            width: 10px;
+            height: 50px;
+        }
+
+        .segment-b, .segment-c {
+            right: 0;
+        }
+
+        .segment-e, .segment-f {
+            left: 0;
+        }
+
+        .segment-b, .segment-f {
+            top: 5px;
+        }
+
+        .segment-c, .segment-e {
+            bottom: 5px;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+                margin-bottom: 30px;
+            }
+
+            .digit {
+                width: 50px;
+                height: 85px;
+                margin: 0 3px;
+            }
+
+            .segment-a, .segment-d, .segment-g {
+                width: 35px;
+                height: 8px;
+                left: 8px;
+            }
+
+            .segment-g {
+                top: 38px;
+            }
+
+            .segment-b, .segment-c, .segment-e, .segment-f {
+                width: 8px;
+                height: 35px;
+            }
+
+            .separator-dots {
+                height: 85px;
+            }
+
+            .separator-dot {
+                width: 8px;
+                height: 8px;
+            }
+
+            .segment-label, .separator-label {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .countdown-container {
+                gap: 10px;
+            }
+
+            .digit {
+                width: 35px;
+                height: 60px;
+                margin: 0 2px;
+            }
+
+            .segment-a, .segment-d, .segment-g {
+                width: 25px;
+                height: 6px;
+                left: 5px;
+            }
+
+            .segment-g {
+                top: 27px;
+            }
+
+            .segment-b, .segment-c, .segment-e, .segment-f {
+                width: 6px;
+                height: 25px;
+            }
+
+            .separator-dots {
+                height: 60px;
+            }
+
+            .separator-dot {
+                width: 6px;
+                height: 6px;
+            }
+
+            .segment-label, .separator-label {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Time till Freedom</h1>
+    
+    <div class="countdown-container">
+        <!-- Days -->
+        <div class="countdown-segment">
+            <div class="digits-container" id="days-digits"></div>
+            <div class="segment-label">Days</div>
+        </div>
+        
+        <!-- Separator between days and hours -->
+        <div class="separator">
+            <div class="separator-dots">
+                <div class="separator-dot"></div>
+                <div class="separator-dot"></div>
+            </div>
+            <div class="separator-label">:</div>
+        </div>
+        
+        <!-- Hours -->
+        <div class="countdown-segment">
+            <div class="digits-container" id="hours-digits"></div>
+            <div class="segment-label">Hours</div>
+        </div>
+        
+        <!-- Separator between hours and minutes -->
+        <div class="separator">
+            <div class="separator-dots">
+                <div class="separator-dot"></div>
+                <div class="separator-dot"></div>
+            </div>
+            <div class="separator-label">:</div>
+        </div>
+        
+        <!-- Minutes -->
+        <div class="countdown-segment">
+            <div class="digits-container" id="minutes-digits"></div>
+            <div class="segment-label">Minutes</div>
+        </div>
+        
+        <!-- Separator between minutes and seconds -->
+        <div class="separator">
+            <div class="separator-dots">
+                <div class="separator-dot"></div>
+                <div class="separator-dot"></div>
+            </div>
+            <div class="separator-label">:</div>
+        </div>
+        
+        <!-- Seconds -->
+        <div class="countdown-segment">
+            <div class="digits-container" id="seconds-digits"></div>
+            <div class="segment-label">Seconds</div>
+        </div>
+    </div>
+
+    <script>
+        // Define segment patterns for each digit (0-9)
+        const digitPatterns = {
+            0: [1, 1, 1, 1, 1, 1, 0], // a, b, c, d, e, f, g
+            1: [0, 1, 1, 0, 0, 0, 0], // b, c
+            2: [1, 1, 0, 1, 1, 0, 1], // a, b, d, e, g
+            3: [1, 1, 1, 1, 0, 0, 1], // a, b, c, d, g
+            4: [0, 1, 1, 0, 0, 1, 1], // b, c, f, g
+            5: [1, 0, 1, 1, 0, 1, 1], // a, c, d, f, g
+            6: [1, 0, 1, 1, 1, 1, 1], // a, c, d, e, f, g
+            7: [1, 1, 1, 0, 0, 0, 0], // a, b, c
+            8: [1, 1, 1, 1, 1, 1, 1], // a, b, c, d, e, f, g
+            9: [1, 1, 1, 1, 0, 1, 1]  // a, b, c, d, f, g
+        };
+
+        // Define segment names in order (a-g)
+        const segmentNames = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
+
+        // Create a 7-segment digit element
+        function createDigit() {
+            const digit = document.createElement('div');
+            digit.className = 'digit';
+            
+            // Create the 7 segments (a-g)
+            for (let i = 0; i < 7; i++) {
+                const segment = document.createElement('div');
+                segment.className = `segment segment-${segmentNames[i]}`;
+                digit.appendChild(segment);
+            }
+            
+            return digit;
+        }
+
+        // Update a digit to display a specific number
+        function updateDigit(digit, number) {
+            const segments = digit.querySelectorAll('.segment');
+            const pattern = digitPatterns[number];
+            
+            for (let i = 0; i < 7; i++) {
+                if (pattern[i]) {
+                    segments[i].classList.add('on');
+                } else {
+                    segments[i].classList.remove('on');
+                }
+            }
+        }
+
+        // Initialize the digits for a specific time unit (days, hours, minutes, seconds)
+        function initTimeUnit(containerId, digitCount) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            const digits = [];
+            
+            for (let i = 0; i < digitCount; i++) {
+                const digit = createDigit();
+                container.appendChild(digit);
+                digits.push(digit);
+            }
+            
+            return digits;
+        }
+
+        // Initialize all displays
+        function initDisplay() {
+            return {
+                days: initTimeUnit('days-digits', 4),
+                hours: initTimeUnit('hours-digits', 2),
+                minutes: initTimeUnit('minutes-digits', 2),
+                seconds: initTimeUnit('seconds-digits', 2)
+            };
+        }
+
+        // Calculate the time remaining until the end date
+        function calculateTimeRemaining(endDate) {
+            const total = endDate - new Date();
+            
+            if (total <= 0) {
+                return {
+                    days: 0,
+                    hours: 0,
+                    minutes: 0,
+                    seconds: 0,
+                    expired: true
+                };
+            }
+            
+            const seconds = Math.floor((total / 1000) % 60);
+            const minutes = Math.floor((total / 1000 / 60) % 60);
+            const hours = Math.floor((total / (1000 * 60 * 60)) % 24);
+            const days = Math.floor(total / (1000 * 60 * 60 * 24));
+            
+            return {
+                days,
+                hours,
+                minutes,
+                seconds,
+                expired: false
+            };
+        }
+
+        // Update the countdown display with current values
+        function updateDisplay(display, timeRemaining) {
+            // Update days (4 digits)
+            const daysStr = String(timeRemaining.days).padStart(4, '0');
+            for (let i = 0; i < 4; i++) {
+                updateDigit(display.days[i], parseInt(daysStr[i]));
+            }
+            
+            // Update hours (2 digits)
+            const hoursStr = String(timeRemaining.hours).padStart(2, '0');
+            for (let i = 0; i < 2; i++) {
+                updateDigit(display.hours[i], parseInt(hoursStr[i]));
+            }
+            
+            // Update minutes (2 digits)
+            const minutesStr = String(timeRemaining.minutes).padStart(2, '0');
+            for (let i = 0; i < 2; i++) {
+                updateDigit(display.minutes[i], parseInt(minutesStr[i]));
+            }
+            
+            // Update seconds (2 digits)
+            const secondsStr = String(timeRemaining.seconds).padStart(2, '0');
+            for (let i = 0; i < 2; i++) {
+                updateDigit(display.seconds[i], parseInt(secondsStr[i]));
+            }
+        }
+
+        // Main function to start the countdown
+        function startCountdown() {
+            // Set the target end date: January 20, 2029 (Inauguration Day)
+            const endDate = new Date('January 20, 2029 12:00:00');
+            
+            // Initialize the display
+            const display = initDisplay();
+            
+            // Update function that runs every second
+            function update() {
+                const timeRemaining = calculateTimeRemaining(endDate);
+                updateDisplay(display, timeRemaining);
+                
+                if (!timeRemaining.expired) {
+                    // Schedule the next update on the next animation frame for smooth updates
+                    requestAnimationFrame(() => {
+                        setTimeout(update, 1000);
+                    });
+                }
+            }
+            
+            // Start the update cycle
+            update();
+        }
+
+        // Start the countdown when the page loads
+        window.addEventListener('load', startCountdown);
+    </script>
+</body>
+</html>
+
