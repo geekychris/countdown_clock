@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time till Freedom</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #111;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .countdown-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .countdown-segment, .separator-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .segment-label {
+            font-size: 1.2rem;
+            margin-top: 10px;
+            text-transform: uppercase;
+            color: #ccc;
+        }
+
+        /* Seven-segment display styling */
+        .digit {
+            width: 70px;
+            height: 120px;
+            position: relative;
+            margin: 0 5px;
+        }
+
+        .segment {
+            position: absolute;
+            background-color: rgba(255, 0, 0, 0.15);
+            transition: background-color 0.2s;
+        }
+
+        .segment.on {
+            background-color: #f00;
+            box-shadow: 0 0 10px #f00;
+        }
+
+        /* Horizontal segments */
+        .segment-a, .segment-d, .segment-g {
+            width: 50px;
+            height: 10px;
+            left: 10px;
+        }
+
+        .segment-a {
+            top: 0;
+        }
+
+        .segment-g {
+            top: 55px;
+        }
+
+        .segment-d {
+            bottom: 0;
+        }
+
+        /* Vertical segments */
+        .segment-b, .segment-c, .segment-e, .segment-f {
+            width: 10px;
+            height: 50px;
+        }
+
+        .segment-b, .segment-c {
+            right: 0;
+        }
+
+        .segment-e, .segment-f {
+            left: 0;
+        }
+
+        .segment-b, .segment-f {
+            top: 5px;
+        }
+
+        .segment-c, .segment-e {
+            bottom: 5px;
+        }
+
+        .colon {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 120px;
+            margin: 0 15px;
+            gap: 30px;
+        }
+
+        .colon-dot {
+            width: 12px;
+            height: 12px;
+            background-color: #f00;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #f00;
+        }
+    </style>
+</head>
+<body>
+    <h1>Time till Freedom</h1>
+    
+    <div class="countdown-container">
+        <div class="countdown-segment" id="days-segment">
+            <div class="digits-container" id="days"></div>
+            <div class="segment-label">Days</div>
+        </div>
+        
+        <div class="separator-container">
+            <div class="colon">
+                <div class="colon-dot"></div>
+                <div class="colon-dot"></div>
+            </div>
+            <div class="segment-label">&nbsp;</div>
+        </div>
+        
+        <div class="countdown-segment" id="hours-segment">
+            <div class="digits-container" id="hours"></div>
+            <div class="segment-label">Hours</div>
+        </div>
+        
+        <div class="countdown-segment" id="minutes-segment">
+            <div class="digits-container" id="minutes"></div>
+            <div class="segment-label">Minutes</div>
+        </div>
+        
+        <div class="countdown-segment" id="seconds-segment">
+            <div class="digits-container" id="seconds"></div>
+            <div class="segment-label">Seconds</div>
+        </div>
+    </div>
+
+    <script>
+        // Define which segments to light up for each digit
+        const digitPatterns = {
+            0: [1, 1, 1, 1, 1, 1, 0], // a, b, c, d, e, f, g
+            1: [0, 1, 1, 0, 0, 0, 0], // b, c
+            2: [1, 1, 0, 1, 1, 0, 1], // a, b, d, e, g
+            3: [1, 1, 1, 1, 0, 0, 1], // a, b, c, d, g
+            4: [0, 1, 1, 0, 0, 1, 1], // b, c, f, g
+            5: [1, 0, 1, 1, 0, 1, 1], // a, c, d, f, g
+            6: [1, 0, 1, 1, 1, 1, 1], // a, c, d, e, f, g
+            7: [1, 1, 1, 0, 0, 0, 0], // a, b, c
+            8: [1, 1, 1, 1, 1, 1, 1], // a, b, c, d, e, f, g
+            9: [1, 1, 1, 1, 0, 1, 1]  // a, b, c, d, f, g
+        };
+
+        // Segment names in order: a, b, c, d, e, f, g
+        const segmentNames = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
+
+        // Create a single seven-segment digit
+        function createDigit() {
+            const digitElement = document.createElement('div');
+            digitElement.className = 'digit';
+            
+            for (let i = 0; i < 7; i++) {
+                const segment = document.createElement('div');
+                segment.className = `segment segment-${segmentNames[i]}`;
+                digitElement.appendChild(segment);
+            }
+            
+            return digitElement;
+        }
+
+        // Update a digit to display a specific number
+        function updateDigit(digitElement, number) {
+            const segments = digitElement.querySelectorAll('.segment');
+            const pattern = digitPatterns[number];
+            
+            for (let i = 0; i < 7; i++) {
+                if (pattern[i]) {
+                    segments[i].classList.add('on');
+                } else {
+                    segments[i].classList.remove('on');
+                }
+            }
+        }
+
+        // Create digits for a time unit (days, hours, minutes, seconds)
+        function createTimeUnit(containerId, digits) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            const digitsContainer = document.createElement('div');
+            digitsContainer.style.display = 'flex';
+            
+            for (let i = 0; i < digits; i++) {
+                const digit = createDigit();
+                digitsContainer.appendChild(digit);
+            }
+            
+            container.appendChild(digitsContainer);
+            return container.querySelectorAll('.digit');
+        }
+
+        // Initialize the countdown display
+        function initCountdown() {
+            const daysDigits = createTimeUnit('days', 4);
+            const hoursDigits = createTimeUnit('hours', 2);
+            const minutesDigits = createTimeUnit('minutes', 2);
+            const secondsDigits = createTimeUnit('seconds', 2);
+
+            return {
+                daysDigits,
+                hoursDigits,
+                minutesDigits,
+                secondsDigits
+            };
+        }
+
+        // Update the display with current countdown values
+        function updateCountdown(elements, timeRemaining) {
+            // Update days (up to 4 digits)
+            const daysStr = timeRemaining.days.toString().padStart(4, '0');
+            for (let i = 0; i < 4; i++) {
+                updateDigit(elements.daysDigits[i], parseInt(daysStr[i]));
+            }
+            
+            // Update hours (2 digits)
+            const hoursStr = timeRemaining.hours.toString().padStart(2, '0');
+            for (let i = 0; i < 2; i++) {
+                updateDigit(elements.hoursDigits[i], parseInt(hoursStr[i]));
+            }
+            
+            // Update minutes (2 digits)
+            const minutesStr = timeRemaining.minutes.toString().padStart(2, '0');
+            for (let i = 0; i < 2; i++) {
+                updateDigit(elements.minutesDigits[i], parseInt(minutesStr[i]));
+            }
+            
+            // Update seconds (2 digits)
+            const secondsStr = timeRemaining.seconds.toString().padStart(2, '0');
+            for (let i = 0; i < 2; i++) {
+                updateDigit(elements.secondsDigits[i], parseInt(secondsStr[i]));
+            }
+        }
+
+        // Calculate time remaining until end date
+        function getTimeRemaining(endDate) {
+            const total = endDate - new Date();
+            
+            if (total <= 0) {
+                return {
+                    days: 0,
+                    hours: 0,
+                    minutes: 0,
+                    seconds: 0,
+                    expired: true
+                };
+            }
+            
+            const seconds = Math.floor((total / 1000) % 60);
+            const minutes = Math.floor((total / 1000 / 60) % 60);
+            const hours = Math.floor((total / (1000 * 60 * 60)) % 24);
+            const days = Math.floor(total / (1000 * 60 * 60 * 24));
+            
+            return {
+                days,
+                hours,
+                minutes,
+                seconds,
+                expired: false
+            };
+        }
+
+        // Main function to start the countdown
+        function startCountdown() {
+            // Set the end date: January 20, 2029
+            const endDate = new Date('January 20, 2029 12:00:00');
+            
+            // Initialize the display
+            const displayElements = initCountdown();
+            
+            // Update the countdown every second
+            function tick() {
+                const timeRemaining = getTimeRemaining(endDate);
+                updateCountdown(displayElements, timeRemaining);
+                
+                if (!timeRemaining.expired) {
+                    requestAnimationFrame(() => {
+                        setTimeout(tick, 1000);
+                    });
+                }
+            }
+            
+            // Start the countdown
+            tick();
+        }
+
+        // Start everything when the page loads
+        window.onload = startCountdown;
+    </script>
+</body>
+</html>
+
