@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.png" alt="Countdown Clock logo" width="180">
+</p>
+
 # Trump Clock Countdown
 
 A web-based countdown timer displaying the days, hours, minutes, and seconds until the end of Trump's presidential term on January 20, 2029.
